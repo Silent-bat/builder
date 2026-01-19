@@ -1,285 +1,289 @@
-# Next.js Boilerplate
+# 🚀 Advanced Page Builder - Next.js SaaS Boilerplate
 
-A modern, production-ready Next.js boilerplate with authentication, database, and beautiful UI components. Built to accelerate your app development.
+A professional-grade, production-ready page builder with 21 advanced components, visual editing, and modern design system. Build stunning websites with carousels, parallax effects, glassmorphism, and animated backgrounds - all without writing code.
 
-## Features
-
-- ⚡ **Next.js 15** - React framework with App Router
-- 🔐 **Better Auth** - Modern authentication solution with email/password
-- 🗄️ **Prisma** - Type-safe ORM with PostgreSQL
-- 🎨 **Tailwind CSS** - Utility-first CSS framework
-- 🧩 **shadcn/ui** - Beautiful, accessible UI components (no icons)
-- 👥 **Role-Based Access** - User and Admin roles with protected routes
-- 🔒 **Middleware Protection** - Secure route protection out of the box
-- 📱 **Responsive Design** - Mobile-first, works on all devices
-- 🌙 **Dark Mode Support** - Built-in dark mode with CSS variables
-- 🚀 **TypeScript** - Fully typed for better DX
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js 18+ installed
-- PostgreSQL database (local or remote)
-- pnpm (recommended package manager)
-
-Install pnpm if you haven't:
-```bash
-npm install -g pnpm
-```
-
-### Installation
-
-1. **Clone or download this boilerplate**
-
-2. **Install dependencies**
-
-```bash
-pnpm install
-```
-
-3. **Set up environment variables**
-
-Copy the `.env.example` file to `.env`:
-
-```bash
-cp .env.example .env
-```
-
-Then edit `.env` and update the values:
-
-```env
-# Database - Update with your PostgreSQL connection string
-DATABASE_URL="postgresql://user:password@localhost:5432/mydb?schema=public"
-
-# Better Auth - Generate a random secret (min 32 characters)
-BETTER_AUTH_SECRET="your-secret-key-here-min-32-chars"
-BETTER_AUTH_URL="http://localhost:3000"
-
-# Admin Setup - First user with this email becomes admin
-ADMIN_EMAIL="admin@example.com"
-```
-
-To generate a secure secret, you can use:
-
-```bash
-openssl rand -base64 32
-```
-
-4. **Set up the database**
-
-Generate Prisma client and push schema to database:
-
-```bash
-pnpm db:generate
-pnpm db:push
-```
-
-For production, use migrations:
-
-```bash
-pnpm db:migrate
-```
-
-5. **Run the development server**
-
-```bash
-pnpm dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser.
-
-## Project Structure
-
-```
-├── app/                      # Next.js App Router
-│   ├── api/                  # API routes
-│   │   └── auth/            # Better Auth API endpoints
-│   ├── auth/                # Authentication pages
-│   │   ├── sign-in/         # Sign in page
-│   │   └── sign-up/         # Sign up page
-│   ├── dashboard/           # User dashboard
-│   ├── admin/               # Admin dashboard
-│   ├── layout.tsx           # Root layout
-│   ├── page.tsx             # Landing page
-│   └── globals.css          # Global styles
-├── components/              # React components
-│   ├── ui/                  # shadcn/ui components
-│   ├── auth/                # Authentication components
-│   └── dashboard/           # Dashboard components
-├── lib/                     # Utilities and configurations
-│   ├── auth.ts              # Better Auth configuration
-│   ├── auth-client.ts       # Client-side auth utilities
-│   ├── db.ts                # Prisma client
-│   ├── session.ts           # Session utilities
-│   └── utils.ts             # Helper functions
-├── prisma/                  # Database schema and migrations
-│   └── schema.prisma        # Prisma schema
-├── middleware.ts            # Next.js middleware for route protection
-└── package.json             # Dependencies and scripts
-```
-
-## Authentication
-
-### Sign Up
-
-Users can create an account at `/auth/sign-up` with:
-- Name
-- Email
-- Password (minimum 8 characters)
-
-### Sign In
-
-Users can sign in at `/auth/sign-in` with:
-- Email
-- Password
-
-### Making a User Admin
-
-To make a user an admin:
-
-1. Set the `ADMIN_EMAIL` in your `.env` file to the user's email
-2. The first user who signs up with that email will automatically become an admin
-3. Alternatively, manually update the user's role in the database:
-
-```sql
-UPDATE "users" SET role = 'ADMIN' WHERE email = 'admin@example.com';
-```
-
-### Protected Routes
-
-- `/dashboard` - Requires authentication
-- `/admin` - Requires authentication + ADMIN role
-
-Routes are protected by:
-1. Middleware (`middleware.ts`) - Initial check for session token
-2. Server components - Session verification with database
-
-## Database
-
-### Schema
-
-The Prisma schema includes:
-- **User** - User accounts with role-based access
-- **Session** - User sessions
-- **Account** - Authentication accounts (email/password, OAuth)
-- **Verification** - Email verification tokens
-
-### Available Scripts
-
-```bash
-# Generate Prisma client
-pnpm db:generate
-
-# Push schema to database (development)
-pnpm db:push
-
-# Create and run migrations (production)
-pnpm db:migrate
-
-# Open Prisma Studio (database GUI)
-pnpm db:studio
-```
-
-## Customization
-
-### Adding More UI Components
-
-This boilerplate includes basic shadcn/ui components. To add more:
-
-1. Create the component file in `components/ui/`
-2. Follow the shadcn/ui patterns used in existing components
-3. Import and use in your pages
-
-### Adding Social Authentication
-
-To add OAuth providers (GitHub, Google, etc.):
-
-1. Update `lib/auth.ts` to include social providers:
-
-```typescript
-socialProviders: {
-  github: {
-    clientId: process.env.GITHUB_CLIENT_ID as string,
-    clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
-  },
-},
-```
-
-2. Add environment variables
-3. Update sign-in/sign-up forms to include social login buttons
-
-### Styling
-
-The app uses Tailwind CSS with CSS variables for theming:
-- Edit `app/globals.css` to customize colors
-- Light and dark mode themes are defined with CSS variables
-- Use `cn()` utility from `lib/utils.ts` for conditional classes
-
-## Deployment
-
-### Vercel (Recommended)
-
-1. Push your code to GitHub
-2. Import your repository in Vercel
-3. Add environment variables in Vercel dashboard
-4. Deploy
-
-### Other Platforms
-
-This is a standard Next.js app and can be deployed to any platform that supports Node.js:
-- Railway
-- Render
-- DigitalOcean
-- AWS
-- etc.
-
-Make sure to:
-1. Set all environment variables
-2. Run database migrations
-3. Use a production PostgreSQL database
-
-## Scripts
-
-```bash
-# Development
-pnpm dev             # Start development server
-
-# Production
-pnpm build           # Build for production
-pnpm start           # Start production server
-
-# Database
-pnpm db:generate     # Generate Prisma client
-pnpm db:push         # Push schema to database
-pnpm db:migrate      # Run migrations
-pnpm db:studio       # Open Prisma Studio
-
-# Linting
-pnpm lint            # Run ESLint
-```
-
-## Tech Stack
-
-- **Framework**: Next.js 15
-- **Language**: TypeScript
-- **Auth**: Better Auth
-- **Database**: PostgreSQL + Prisma
-- **Styling**: Tailwind CSS
-- **UI Components**: shadcn/ui
-- **Deployment**: Vercel (recommended)
-
-## License
-
-MIT
-
-## Support
-
-For issues and questions:
-- Check the documentation for each technology used
-- Review the code comments
-- Open an issue in your repository
+![Next.js](https://img.shields.io/badge/Next.js-15-black)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38bdf8)
+![License](https://img.shields.io/badge/license-MIT-green)
 
 ---
 
-Built with ❤️ using Next.js, Better Auth, Prisma, and Tailwind CSS
+## ✨ Features
+
+### 🎨 **Advanced Page Builder**
+- **21 Professional Components** - More than premium builders
+- **Visual Editing** - Click any text to edit inline
+- **No Code Required** - Intuitive drag-and-drop interface
+- **Real-time Preview** - See changes instantly
+- **Responsive Design** - Mobile, tablet, and desktop views
+
+### 🎠 **Advanced Components**
+- **Carousel/Slider** - Auto-playing slides with smooth transitions
+- **Parallax Sections** - Scroll-based background animations
+- **Glass Cards** - Modern glassmorphism with 3 background types
+- **Animated Backgrounds** - Particles, waves, gradients, and grid patterns
+- **Timeline** - Professional step-by-step displays
+- And 16 more fully-featured components!
+
+### 🎭 **Modern Design System**
+- **Dark Theme** - Professional Convergent.org aesthetic
+- **Smooth Animations** - GPU-accelerated effects
+- **Gradient System** - Beautiful color transitions
+- **Glow Effects** - Eye-catching hover states
+- **Responsive Typography** - Fluid scaling with clamp()
+
+### 📊 **Page Management**
+- **Search & Filter** - Find pages quickly
+- **Duplicate Pages** - Clone entire pages instantly
+- **Version Control** - Draft and published states
+- **Component Tracking** - See component counts per page
+- **Bulk Actions** - Manage multiple pages efficiently
+
+### 🔐 **Complete Authentication**
+- **Better Auth** - Modern auth solution
+- **Email/Password** - Traditional authentication
+- **Email Verification** - Secure account activation
+- **Password Reset** - User-friendly recovery
+- **Role-based Access** - Admin and user roles
+
+### 🏢 **Multi-Tenancy**
+- **Organizations** - Team workspaces
+- **Team Management** - Invite and manage members
+- **Role Permissions** - Fine-grained access control
+
+### 💳 **Billing Integration**
+- **Stripe** - Payment processing
+- **Subscription Plans** - Recurring billing
+- **Customer Portal** - Self-service management
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js 18+ 
+- npm or pnpm
+- PostgreSQL or SQLite database
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/Silent-bat/builder.git
+cd builder
+
+# Install dependencies
+npm install
+# or
+pnpm install
+
+# Setup environment variables
+cp .env.example .env
+
+# Configure your database URL in .env
+DATABASE_URL="file:./prisma/dev.db"  # For SQLite
+# or
+DATABASE_URL="postgresql://..."      # For PostgreSQL
+
+# Push database schema
+npx prisma db push
+
+# (Optional) Seed sample data
+npx prisma db seed
+
+# Start development server
+npm run dev
+```
+
+Visit `http://localhost:3000` and login with:
+- **Email:** admin@example.com
+- **Password:** Admin123!
+
+---
+
+## 🎨 Component Library
+
+### Layout Components (2)
+- **Navbar** - Responsive navigation with mobile menu
+- **Footer** - Multi-column footer with links
+
+### Content Components (5)
+- **Text** - Rich text content blocks
+- **Image** - Responsive images with captions
+- **FAQ** - Accordion-style Q&A
+- **Timeline** ⭐ - Step-by-step process display
+
+### Marketing Components (10)
+- **Hero** - Full-screen hero with animations
+- **CTA** - Call-to-action sections
+- **Features** - Feature showcases with icons
+- **Testimonials** - Customer reviews
+- **Stats** - Animated statistics
+- **Newsletter** - Email signup forms
+- **Carousel** ⭐ - Auto-playing slider
+- **Parallax** ⭐ - Scroll effects
+- **Glass Cards** ⭐ - Glassmorphism
+- **Animated BG** ⭐ - Background animations
+
+### Commerce Components (4)
+- **Product Grid** - Product listings
+- **Product Showcase** - Featured products
+- **Category Showcase** - Category displays
+- **Brand Showcase** - Brand logos
+
+---
+
+## 🎭 Advanced Features
+
+### Inline Editing
+Click any text element to edit it directly. No sidebars, no forms - just click and type.
+
+### Visual Array Editors
+Edit complex data structures (testimonials, features, products) through intuitive visual interfaces. No JSON required!
+
+### Animation System
+- **Gradient Shift** - 8s color transitions
+- **Glow Pulse** - Pulsing glow effects
+- **Float** - 6s floating motion
+- **Shimmer** - Loading animations
+- **Fade In Up** - Entrance animations
+
+### Responsive Design
+All components automatically adapt to:
+- 📱 Mobile (320px+)
+- 📱 Tablet (640px+)
+- 💻 Desktop (1024px+)
+- 🖥️ Large (1440px+)
+
+---
+
+## 🛠️ Tech Stack
+
+### Core
+- **Next.js 15** - React framework with App Router
+- **React 19** - Latest React features
+- **TypeScript** - Type safety throughout
+- **Tailwind CSS** - Utility-first styling
+
+### Database & Auth
+- **Prisma** - Type-safe ORM
+- **Better Auth** - Modern authentication
+- **PostgreSQL/SQLite** - Database options
+
+### UI & Animations
+- **Radix UI** - Accessible components
+- **Custom CSS** - Advanced effects
+- **GPU Acceleration** - Smooth performance
+
+---
+
+## 📦 Build & Deploy
+
+### Production Build
+```bash
+# Build for production
+npm run build
+
+# Start production server
+npm start
+```
+
+### Deploy to Vercel
+```bash
+# Install Vercel CLI
+npm i -g vercel
+
+# Deploy
+vercel
+```
+
+The app can also be deployed to Netlify, Railway, Render, or any Node.js hosting platform.
+
+---
+
+## 🎯 Use Cases
+
+### Perfect For:
+- 🚀 **SaaS Landing Pages** - Showcase your product
+- 🛍️ **E-commerce Sites** - Product catalogs
+- 💼 **Agency Websites** - Portfolio and services
+- 📱 **App Landing Pages** - Mobile app marketing
+- 🎨 **Portfolio Sites** - Creative showcases
+- 🏢 **Corporate Sites** - Business websites
+- 📰 **Marketing Pages** - Campaign landing pages
+
+---
+
+## 📖 Environment Variables
+
+Required variables in `.env`:
+
+```env
+# Database
+DATABASE_URL="your-database-url"
+
+# Better Auth
+BETTER_AUTH_SECRET="your-secret-key"
+BETTER_AUTH_URL="http://localhost:3000"
+
+# Email (Optional - for verification)
+RESEND_API_KEY="your-resend-key"
+
+# Stripe (Optional - for billing)
+STRIPE_SECRET_KEY="your-stripe-key"
+STRIPE_WEBHOOK_SECRET="your-webhook-secret"
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="your-publishable-key"
+```
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to:
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+---
+
+## 📝 License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+---
+
+## 🙏 Acknowledgments
+
+- **Convergent.org** - Design inspiration
+- **Next.js Team** - Amazing framework
+- **Vercel** - Hosting platform
+- **Better Auth** - Authentication solution
+- **Tailwind CSS** - Styling system
+
+---
+
+## 📬 Support
+
+- **Issues:** [GitHub Issues](https://github.com/Silent-bat/builder/issues)
+- **Discussions:** [GitHub Discussions](https://github.com/Silent-bat/builder/discussions)
+
+---
+
+## 🌟 Screenshots
+
+### Page Builder Interface
+![Page Builder](https://via.placeholder.com/800x400?text=Page+Builder+Interface)
+
+### Component Library
+![Components](https://via.placeholder.com/800x400?text=21+Professional+Components)
+
+### Advanced Components
+![Advanced](https://via.placeholder.com/800x400?text=Carousel+Parallax+Glass+Cards)
+
+---
+
+**Built with ❤️ using Next.js, TypeScript, and Tailwind CSS**
+
+**⭐ Star this repo if you find it useful!**
