@@ -1,0 +1,331 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id
+  name          String
+  email         String         @unique
+  emailVerified Boolean
+  image         String?
+  role          String         @default("USER")
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  
+  sessions            Session[]
+  accounts            Account[]
+  verifications       Verification[]
+  projects            Project[]
+  teamMembers         TeamMember[]
+  tickets             SupportTicket[]
+  ownedOrganizations  Organization[]      @relation("OrganizationOwner")
+  organizationMembers OrganizationMember[]
+  sentInvites         Invite[]            @relation("InviteSender")
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  userId    String
+  expiresAt DateTime
+  token     String   @unique
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("session")
+}
+
+model Account {
+  id           String    @id
+  userId       String
+  accountId    String
+  providerId   String
+  accessToken  String?
+  refreshToken String?
+  expiresAt    DateTime?
+  password     String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  userId     String?
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([identifier, value])
+  @@map("verification")
+}
+
+model Page {
+  id             String          @id @default(cuid())
+  type           PageType
+  slug           String
+  title          String
+  contentMd      String          @default("")
+  published      Boolean         @default(true)
+  seoTitle       String?
+  seoDescription String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  components     PageComponent[]
+
+  @@unique([type, slug])
+  @@map("page")
+}
+
+enum PageType {
+  LANDING
+  DASHBOARD
+}
+
+model PageComponent {
+  id        String   @id @default(cuid())
+  pageId    String
+  type      String
+  order     Int      @default(0)
+  props     Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  page Page @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@map("page_component")
+}
+
+model Project {
+  id          String        @id @default(cuid())
+  title       String
+  description String?
+  status      ProjectStatus @default(ACTIVE)
+  progress    Int           @default(0)
+  userId      String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("project")
+}
+
+enum ProjectStatus {
+  ACTIVE
+  COMPLETED
+  ARCHIVED
+}
+
+model Organization {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  ownerId     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  owner   User                 @relation("OrganizationOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members OrganizationMember[]
+  teams   Team[]
+  invites Invite[]
+
+  @@map("organization")
+}
+
+model OrganizationMember {
+  id             String                 @id @default(cuid())
+  organizationId String
+  userId         String
+  role           OrganizationMemberRole @default(MEMBER)
+  status         MemberStatus           @default(ACTIVE)
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@map("organization_member")
+}
+
+enum OrganizationMemberRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+model Team {
+  id             String   @id @default(cuid())
+  name           String
+  organizationId String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  members      TeamMember[]
+  invites      Invite[]
+
+  @@map("team")
+}
+
+model TeamMember {
+  id        String         @id @default(cuid())
+  teamId    String
+  userId    String
+  role      TeamMemberRole @default(MEMBER)
+  status    MemberStatus   @default(ACTIVE)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@map("team_member")
+}
+
+enum TeamMemberRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum MemberStatus {
+  ACTIVE
+  PENDING
+  INACTIVE
+}
+
+model Invite {
+  id             String       @id @default(cuid())
+  email          String
+  token          String       @unique
+  organizationId String?
+  teamId         String?
+  role           String       @default("MEMBER")
+  status         InviteStatus @default(PENDING)
+  invitedById    String
+  expiresAt      DateTime
+  acceptedAt     DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  team         Team?         @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  invitedBy    User          @relation("InviteSender", fields: [invitedById], references: [id], onDelete: Cascade)
+
+  @@map("invite")
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  CANCELLED
+}
+
+model SupportTicket {
+  id        String        @id @default(cuid())
+  userId    String
+  subject   String
+  message   String
+  status    TicketStatus  @default(OPEN)
+  priority  TicketPriority @default(MEDIUM)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("support_ticket")
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model DocCategory {
+  id          String       @id @default(cuid())
+  title       String
+  description String?
+  order       Int          @default(0)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  articles DocArticle[]
+
+  @@map("doc_category")
+}
+
+model DocArticle {
+  id          String      @id @default(cuid())
+  categoryId  String
+  title       String
+  slug        String
+  content     String
+  views       Int         @default(0)
+  published   Boolean     @default(true)
+  order       Int         @default(0)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  category DocCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([categoryId, slug])
+  @@map("doc_article")
+}
+
+model Invoice {
+  id              String        @id @default(cuid())
+  userId          String
+  stripeInvoiceId String?       @unique
+  amount          Int
+  currency        String        @default("usd")
+  status          InvoiceStatus @default(PENDING)
+  description     String?
+  paidAt          DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@map("invoice")
+}
+
+enum InvoiceStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELLED
+}
