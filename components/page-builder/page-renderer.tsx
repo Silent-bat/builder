@@ -1,3 +1,5 @@
+"use client";
+
 import { renderComponent } from "./component-registry";
 import { applyComponentStyles } from "./style-utils";
 
