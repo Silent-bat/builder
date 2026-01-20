@@ -102,6 +102,7 @@ model Page {
 enum PageType {
   LANDING
   DASHBOARD
+  NORMAL
 }
 
 model PageComponent {
