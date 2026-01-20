@@ -31,17 +31,33 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
     });
     const isAdmin = session?.user ? (session.user as any).role === "ADMIN" : false;
 
-    const components = page.components.map((comp) => ({
-      id: comp.id,
-      type: comp.type,
-      props: comp.props,
-    }));
+    // TEMPORARILY DISABLED - PageRenderer causes 500 error in production
+    // Will be fixed in next update
+    // const components = page.components.map((comp) => ({
+    //   id: comp.id,
+    //   type: comp.type,
+    //   props: comp.props,
+    // }));
 
+    // return (
+    //   <>
+    //     <PageRenderer components={components} />
+    //     <PageEditButton pageId={page.id} isAdmin={isAdmin} />
+    //   </>
+    // );
+
+    // Temporary fallback - show page info
     return (
-      <>
-        <PageRenderer components={components} />
-        <PageEditButton pageId={page.id} isAdmin={isAdmin} />
-      </>
+      <div className="min-h-screen p-8">
+        <h1 className="text-4xl font-bold mb-4">{page.title}</h1>
+        <p className="text-muted-foreground mb-4">
+          This page is being rebuilt. Custom components temporarily disabled.
+        </p>
+        <div className="p-4 bg-muted rounded">
+          <p className="text-sm">Page has {page.components.length} components</p>
+          <p className="text-sm">Status: {page.published ? 'Published' : 'Draft'}</p>
+        </div>
+      </div>
     );
   } catch (error) {
     console.error('[PublicPage] Error loading page:', {
