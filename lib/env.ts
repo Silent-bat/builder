@@ -37,12 +37,12 @@ export const env = createEnv({
   skipValidation: !!process.env.SKIP_ENV_VALIDATION,
   onValidationError: (error) => {
     console.error("❌ Environment validation failed:");
-    console.error(error.flatten().fieldErrors);
+    console.error(JSON.stringify(error, null, 2));
     throw new Error(
       `Missing or invalid environment variables. Check your Vercel environment settings.`
     );
   },
-  onInvalidAccess: (variable) => {
-    console.error(`❌ Attempted to access invalid environment variable: ${variable}`);
+  onInvalidAccess: (variable): never => {
+    throw new Error(`❌ Attempted to access invalid environment variable: ${variable}`);
   },
 });
