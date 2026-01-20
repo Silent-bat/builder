@@ -1,13 +1,14 @@
 import { prisma } from "@/lib/db";
 import { PageRenderer } from "@/components/page-builder/page-renderer";
 import { PageEditButton } from "@/components/page-builder/page-edit-button";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
+// import { auth } from "@/lib/auth"; // Temporarily disabled to test
+// import { headers } from "next/headers"; // Temporarily disabled to test
 import Link from "next/link";
 
 export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
+  console.log("[HomePage] Starting render...");
   // Try to find a landing page with slug "home" or any LANDING page
   let page = null;
   let dbError = null;
@@ -33,20 +34,21 @@ export default async function HomePage() {
     page = null;
   }
 
-  // Check if user is admin
+  // Check if user is admin - TEMPORARILY DISABLED
   let session = null;
   let isAdmin = false;
   let authError = null;
-  try {
-    session = await auth.api.getSession({
-      headers: await headers(),
-    });
-    isAdmin = session?.user ? (session.user as any).role === "ADMIN" : false;
-  } catch (error) {
-    // Session check failed
-    console.error("[HomePage] Auth error:", error);
-    authError = error instanceof Error ? error.message : "Unknown error";
-  }
+  // try {
+  //   session = await auth.api.getSession({
+  //     headers: await headers(),
+  //   });
+  //   isAdmin = session?.user ? (session.user as any).role === "ADMIN" : false;
+  // } catch (error) {
+  //   // Session check failed
+  //   console.error("[HomePage] Auth error:", error);
+  //   authError = error instanceof Error ? error.message : "Unknown error";
+  // }
+  console.log("[HomePage] Page query result:", page ? "Found" : "Not found");
 
   // If page exists and has components, render it
   if (page && page.components.length > 0) {
