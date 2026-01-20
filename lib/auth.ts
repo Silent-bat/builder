@@ -13,6 +13,13 @@ export const auth = betterAuth({
     expiresIn: 60 * 60 * 24 * 7, // 7 days
     updateAge: 60 * 60 * 24, // 1 day (session will be updated if it's older than this)
   },
+  // Ensure BETTER_AUTH_URL is properly set
+  baseURL: process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_BETTER_AUTH_URL,
+  trustedOrigins: [
+    process.env.BETTER_AUTH_URL,
+    process.env.NEXT_PUBLIC_BETTER_AUTH_URL,
+    "https://thenextbuilder.vercel.app",
+  ].filter(Boolean) as string[],
 });
 
 export type Session = typeof auth.$Infer.Session.session;

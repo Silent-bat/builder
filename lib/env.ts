@@ -35,4 +35,14 @@ export const env = createEnv({
     NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
   },
   skipValidation: !!process.env.SKIP_ENV_VALIDATION,
+  onValidationError: (error) => {
+    console.error("❌ Environment validation failed:");
+    console.error(error.flatten().fieldErrors);
+    throw new Error(
+      `Missing or invalid environment variables. Check your Vercel environment settings.`
+    );
+  },
+  onInvalidAccess: (variable) => {
+    console.error(`❌ Attempted to access invalid environment variable: ${variable}`);
+  },
 });
