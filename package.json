@@ -13,7 +13,10 @@
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
-    "db:seed": "tsx prisma/seed.ts"
+    "db:seed": "tsx prisma/seed.ts",
+    "db:test": "node scripts/test-db-connection.js",
+    "env:check": "node scripts/check-production-env.js",
+    "production:check": "npm run env:check && npm run db:test"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
