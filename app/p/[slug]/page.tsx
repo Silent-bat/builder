@@ -8,62 +8,84 @@ import { headers } from "next/headers";
 export default async function PublicPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
 
-  const page = await prisma.page.findFirst({
-    where: { 
-      slug,
-      published: true, // Only show published pages
-    },
-    include: {
-      components: {
-        orderBy: { order: "asc" },
+  try {
+    const page = await prisma.page.findFirst({
+      where: { 
+        slug,
+        published: true, // Only show published pages
       },
-    },
-  });
+      include: {
+        components: {
+          orderBy: { order: "asc" },
+        },
+      },
+    });
 
-  if (!page) {
-    notFound();
+    if (!page) {
+      notFound();
+    }
+
+    // Check if user is admin
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+    const isAdmin = session?.user ? (session.user as any).role === "ADMIN" : false;
+
+    const components = page.components.map((comp) => ({
+      id: comp.id,
+      type: comp.type,
+      props: comp.props,
+    }));
+
+    return (
+      <>
+        <PageRenderer components={components} />
+        <PageEditButton pageId={page.id} isAdmin={isAdmin} />
+      </>
+    );
+  } catch (error) {
+    console.error('[PublicPage] Error loading page:', {
+      slug,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      hasDatabase: !!process.env.DATABASE_URL,
+      nodeEnv: process.env.NODE_ENV,
+    });
+    throw error;
   }
-
-  // Check if user is admin
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-  const isAdmin = session?.user ? (session.user as any).role === "ADMIN" : false;
-
-  const components = page.components.map((comp) => ({
-    id: comp.id,
-    type: comp.type,
-    props: comp.props,
-  }));
-
-  return (
-    <>
-      <PageRenderer components={components} />
-      <PageEditButton pageId={page.id} isAdmin={isAdmin} />
-    </>
-  );
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
 
-  const page = await prisma.page.findFirst({
-    where: { slug, published: true },
-    select: {
-      title: true,
-      seoTitle: true,
-      seoDescription: true,
-    },
-  });
+  try {
+    const page = await prisma.page.findFirst({
+      where: { slug, published: true },
+      select: {
+        title: true,
+        seoTitle: true,
+        seoDescription: true,
+      },
+    });
 
-  if (!page) {
+    if (!page) {
+      return {
+        title: "Page Not Found",
+      };
+    }
+
     return {
-      title: "Page Not Found",
+      title: page.seoTitle || page.title,
+      description: page.seoDescription || `Visit ${page.title}`,
+    };
+  } catch (error) {
+    console.error('[PublicPage] Error in generateMetadata:', {
+      slug,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
+    return {
+      title: "Error Loading Page",
+      description: "An error occurred while loading this page",
     };
   }
-
-  return {
-    title: page.seoTitle || page.title,
-    description: page.seoDescription || `Visit ${page.title}`,
-  };
 }
