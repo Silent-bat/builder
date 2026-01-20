@@ -51,20 +51,21 @@ export default async function HomePage() {
   console.log("[HomePage] Page query result:", page ? "Found" : "Not found");
 
   // If page exists and has components, render it
-  if (page && page.components.length > 0) {
-    const components = page.components.map((comp) => ({
-      id: comp.id,
-      type: comp.type,
-      props: comp.props,
-    }));
+  // TEMPORARILY DISABLED - Testing
+  // if (page && page.components.length > 0) {
+  //   const components = page.components.map((comp) => ({
+  //     id: comp.id,
+  //     type: comp.type,
+  //     props: comp.props,
+  //   }));
 
-    return (
-      <>
-        <PageRenderer components={components} />
-        <PageEditButton pageId={page.id} isAdmin={isAdmin} />
-      </>
-    );
-  }
+  //   return (
+  //     <>
+  //       <PageRenderer components={components} />
+  //       <PageEditButton pageId={page.id} isAdmin={isAdmin} />
+  //     </>
+  //   );
+  // }
 
   // Default landing page if no custom page exists
   return (
@@ -162,10 +163,13 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* Temporarily disabled
       {isAdmin && page && (
         <PageEditButton pageId={page.id} isAdmin={true} />
       )}
+      */}
 
+      {/* Temporarily disabled
       {isAdmin && !page && (
         <div className="fixed bottom-4 right-4 z-50">
           <Link href="/admin/pages/new">
@@ -178,6 +182,7 @@ export default async function HomePage() {
           </Link>
         </div>
       )}
+      */}
     </div>
   );
 }
