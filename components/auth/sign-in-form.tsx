@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,8 @@ export function SignInForm() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const from = searchParams.get("from");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,7 +33,18 @@ export function SignInForm() {
       }
       
       toast.success("Welcome back!", "You have successfully signed in");
-      router.push("/dashboard");
+      
+      // Redirect to the page they came from, or based on user role
+      if (from && !from.startsWith("/auth")) {
+        router.push(from);
+      } else {
+        const userRole = (result.data?.user as any)?.role;
+        if (userRole === "ADMIN") {
+          router.push("/admin");
+        } else {
+          router.push("/dashboard");
+        }
+      }
     } catch (err: any) {
       console.error("Sign in error:", err);
       

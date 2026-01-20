@@ -33,13 +33,21 @@ export function SignUpForm() {
     setLoading(true);
 
     try {
-      await signUp.email({
+      const result = await signUp.email({
         email,
         password,
         name,
       });
+      
       toast.success("Account created!", "Welcome to the platform");
-      router.push("/dashboard");
+      
+      // Redirect based on user role (new users are typically USER role)
+      const userRole = (result.data?.user as any)?.role;
+      if (userRole === "ADMIN") {
+        router.push("/admin");
+      } else {
+        router.push("/dashboard");
+      }
     } catch (err: any) {
       toast.error("Sign up failed", err.message || "Failed to create account");
     } finally {
