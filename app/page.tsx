@@ -10,6 +10,7 @@ export const dynamic = 'force-dynamic';
 export default async function HomePage() {
   // Try to find a landing page with slug "home" or any LANDING page
   let page = null;
+  let dbError = null;
   try {
     page = await prisma.page.findFirst({
       where: {
@@ -27,20 +28,24 @@ export default async function HomePage() {
     });
   } catch (error) {
     // Database not available - log and continue with default page
-    console.error("Database error:", error);
+    console.error("[HomePage] Database error:", error);
+    dbError = error instanceof Error ? error.message : "Unknown error";
     page = null;
   }
 
   // Check if user is admin
   let session = null;
   let isAdmin = false;
+  let authError = null;
   try {
     session = await auth.api.getSession({
       headers: await headers(),
     });
     isAdmin = session?.user ? (session.user as any).role === "ADMIN" : false;
   } catch (error) {
-    // Session check failed during build
+    // Session check failed
+    console.error("[HomePage] Auth error:", error);
+    authError = error instanceof Error ? error.message : "Unknown error";
   }
 
   // If page exists and has components, render it
@@ -62,6 +67,15 @@ export default async function HomePage() {
   // Default landing page if no custom page exists
   return (
     <div className="min-h-screen">
+      {/* Debug info - remove after fixing */}
+      {(dbError || authError) && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 m-4 rounded">
+          <p className="font-bold">Debug Information:</p>
+          {dbError && <p className="text-sm">DB Error: {dbError}</p>}
+          {authError && <p className="text-sm">Auth Error: {authError}</p>}
+        </div>
+      )}
+      
       {/* Hero Section */}
       <section className="relative py-20 px-4 text-center bg-gradient-to-b from-primary/10 to-background">
         <div className="max-w-4xl mx-auto">
