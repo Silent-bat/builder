@@ -50,7 +50,7 @@ export default async function HomePage() {
   }
   console.log("[HomePage] Page query result:", page ? "Found" : "Not found");
 
-  // If page exists and has components, render it
+  // Always show LANDING page if it exists, otherwise default homepage
   if (page && page.components.length > 0) {
     try {
       const components = page.components.map((comp) => ({

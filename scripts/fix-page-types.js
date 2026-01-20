@@ -32,25 +32,50 @@ async function fixPageTypes() {
   console.log('   - /p/shop show "shop" content');
   console.log('   - /p/store show "store" content');
   
-  // Uncomment these lines to apply the changes:
-  /*
-  await prisma.page.update({
-    where: { slug: 'home' },
-    data: { type: 'LANDING' }
+  // Apply the changes:
+  console.log('\n🔧 Applying changes...');
+  
+  // Get page IDs first
+  const homePageId = await prisma.page.findFirst({ where: { slug: 'home' }, select: { id: true } });
+  const shopPageId = await prisma.page.findFirst({ where: { slug: 'shop' }, select: { id: true } });
+  const storePageId = await prisma.page.findFirst({ where: { slug: 'store' }, select: { id: true } });
+  
+  if (homePageId) {
+    await prisma.page.update({
+      where: { id: homePageId.id },
+      data: { type: 'LANDING' }
+    });
+    console.log('   ✅ home → LANDING');
+  }
+  
+  if (shopPageId) {
+    await prisma.page.update({
+      where: { id: shopPageId.id }, 
+      data: { type: 'NORMAL' }
+    });
+    console.log('   ✅ shop → NORMAL');
+  }
+  
+  if (storePageId) {
+    await prisma.page.update({
+      where: { id: storePageId.id },
+      data: { type: 'NORMAL' }
+    });
+    console.log('   ✅ store → NORMAL');
+  }
+  
+  console.log('\n✅ Page types updated successfully!');
+  
+  // Verify the changes
+  console.log('\n🔍 Updated page types:');
+  const updatedPages = await prisma.page.findMany({
+    select: { slug: true, type: true, title: true },
+    orderBy: { createdAt: 'asc' }
   });
   
-  await prisma.page.update({
-    where: { slug: 'shop' }, 
-    data: { type: 'NORMAL' }
+  updatedPages.forEach(page => {
+    console.log(`   ${page.slug} (${page.type}) - ${page.title}`);
   });
-  
-  await prisma.page.update({
-    where: { slug: 'store' },
-    data: { type: 'NORMAL' }
-  });
-  
-  console.log('✅ Page types updated successfully!');
-  */
   
   console.log('\n🚀 To apply changes, uncomment the update code in this script and run again.');
 }
