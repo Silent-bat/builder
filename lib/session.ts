@@ -6,7 +6,8 @@ import { IMPERSONATION_COOKIE } from "./impersonation";
 
 export async function getSession() {
   const cookieStore = await cookies();
-  const sessionToken = cookieStore.get("better-auth.session_token")?.value;
+  const sessionToken = cookieStore.get("__Secure-better-auth.session_token")?.value ||
+    cookieStore.get("better-auth.session_token")?.value;
 
   if (!sessionToken) {
     return null;
@@ -15,7 +16,7 @@ export async function getSession() {
   try {
     const session = await auth.api.getSession({
       headers: {
-        cookie: `better-auth.session_token=${sessionToken}`,
+        cookie: `__Secure-better-auth.session_token=${sessionToken}`,
       },
     });
 
