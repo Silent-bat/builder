@@ -8,7 +8,8 @@ export async function middleware(request: NextRequest) {
   const allCookies = Array.from(request.cookies.getAll());
   
   // Get the session token from cookies (try multiple possible names)
-  const sessionToken = request.cookies.get("better-auth.session_token")?.value ||
+  const sessionToken = request.cookies.get("__Secure-better-auth.session_token")?.value ||
+    request.cookies.get("better-auth.session_token")?.value ||
     request.cookies.get("session")?.value ||
     request.cookies.get("auth_session")?.value ||
     request.cookies.get("better-auth.session")?.value;
@@ -21,7 +22,8 @@ export async function middleware(request: NextRequest) {
       cookieCount: allCookies.length,
       cookieNames: allCookies.map(c => c.name),
       sessionTokenSource: sessionToken ? 
-        (request.cookies.get("better-auth.session_token")?.value ? "better-auth.session_token" :
+        (request.cookies.get("__Secure-better-auth.session_token")?.value ? "__Secure-better-auth.session_token" :
+         request.cookies.get("better-auth.session_token")?.value ? "better-auth.session_token" :
          request.cookies.get("session")?.value ? "session" :
          request.cookies.get("auth_session")?.value ? "auth_session" : "better-auth.session") : "none"
     });
