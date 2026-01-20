@@ -1,8 +1,8 @@
-// import { prisma } from "@/lib/db"; // Temporarily disabled
-// import { PageRenderer } from "@/components/page-builder/page-renderer"; // Temporarily disabled
-// import { PageEditButton } from "@/components/page-builder/page-edit-button"; // Temporarily disabled
-// import { auth } from "@/lib/auth"; // Temporarily disabled to test
-// import { headers } from "next/headers"; // Temporarily disabled to test
+import { prisma } from "@/lib/db";
+import { PageRenderer } from "@/components/page-builder/page-renderer";
+import { PageEditButton } from "@/components/page-builder/page-edit-button";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import Link from "next/link";
 
 export const dynamic = 'force-dynamic';
@@ -12,60 +12,64 @@ export default async function HomePage() {
   // Try to find a landing page with slug "home" or any LANDING page
   let page = null;
   let dbError = null;
-  // try {
-  //   page = await prisma.page.findFirst({
-  //     where: {
-  //       type: "LANDING",
-  //       published: true,
-  //     },
-  //     include: {
-  //       components: {
-  //         orderBy: { order: "asc" },
-  //       },
-  //     },
-  //     orderBy: {
-  //       createdAt: "asc", // Get the first created landing page
-  //     },
-  //   });
-  // } catch (error) {
-  //   // Database not available - log and continue with default page
-  //   console.error("[HomePage] Database error:", error);
-  //   dbError = error instanceof Error ? error.message : "Unknown error";
-  //   page = null;
-  // }
+  try {
+    page = await prisma.page.findFirst({
+      where: {
+        type: "LANDING",
+        published: true,
+      },
+      include: {
+        components: {
+          orderBy: { order: "asc" },
+        },
+      },
+      orderBy: {
+        createdAt: "asc", // Get the first created landing page
+      },
+    });
+  } catch (error) {
+    // Database not available - log and continue with default page
+    console.error("[HomePage] Database error:", error);
+    dbError = error instanceof Error ? error.message : "Unknown error";
+    page = null;
+  }
 
-  // Check if user is admin - TEMPORARILY DISABLED
+  // Check if user is admin
   let session = null;
   let isAdmin = false;
   let authError = null;
-  // try {
-  //   session = await auth.api.getSession({
-  //     headers: await headers(),
-  //   });
-  //   isAdmin = session?.user ? (session.user as any).role === "ADMIN" : false;
-  // } catch (error) {
-  //   // Session check failed
-  //   console.error("[HomePage] Auth error:", error);
-  //   authError = error instanceof Error ? error.message : "Unknown error";
-  // }
+  try {
+    session = await auth.api.getSession({
+      headers: await headers(),
+    });
+    isAdmin = session?.user ? (session.user as any).role === "ADMIN" : false;
+  } catch (error) {
+    // Session check failed - not critical for homepage
+    console.error("[HomePage] Auth error:", error);
+    authError = error instanceof Error ? error.message : "Unknown error";
+  }
   console.log("[HomePage] Page query result:", page ? "Found" : "Not found");
 
   // If page exists and has components, render it
-  // TEMPORARILY DISABLED - Testing
-  // if (page && page.components.length > 0) {
-  //   const components = page.components.map((comp) => ({
-  //     id: comp.id,
-  //     type: comp.type,
-  //     props: comp.props,
-  //   }));
+  if (page && page.components.length > 0) {
+    try {
+      const components = page.components.map((comp) => ({
+        id: comp.id,
+        type: comp.type,
+        props: comp.props,
+      }));
 
-  //   return (
-  //     <>
-  //       <PageRenderer components={components} />
-  //       <PageEditButton pageId={page.id} isAdmin={isAdmin} />
-  //     </>
-  //   );
-  // }
+      return (
+        <>
+          <PageRenderer components={components} />
+          <PageEditButton pageId={page.id} isAdmin={isAdmin} />
+        </>
+      );
+    } catch (renderError) {
+      console.error("[HomePage] PageRenderer error:", renderError);
+      // Fall through to default page if PageRenderer fails
+    }
+  }
 
   // Default landing page if no custom page exists
   return (
@@ -163,13 +167,10 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Temporarily disabled
       {isAdmin && page && (
         <PageEditButton pageId={page.id} isAdmin={true} />
       )}
-      */}
 
-      {/* Temporarily disabled
       {isAdmin && !page && (
         <div className="fixed bottom-4 right-4 z-50">
           <Link href="/admin/pages/new">
@@ -182,7 +183,6 @@ export default async function HomePage() {
           </Link>
         </div>
       )}
-      */}
     </div>
   );
 }
