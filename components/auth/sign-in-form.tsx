@@ -34,14 +34,25 @@ export function SignInForm() {
       
       toast.success("Welcome back!", "You have successfully signed in");
       
+      // Debug logging
+      console.log('[Sign-in] Success result:', {
+        hasUser: !!result.data?.user,
+        userRole: (result.data?.user as any)?.role,
+        from: from,
+        baseURL: process.env.NEXT_PUBLIC_BETTER_AUTH_URL,
+      });
+      
       // Redirect to the page they came from, or based on user role
       if (from && !from.startsWith("/auth")) {
+        console.log('[Sign-in] Redirecting to:', from);
         router.push(from);
       } else {
         const userRole = (result.data?.user as any)?.role;
         if (userRole === "ADMIN") {
+          console.log('[Sign-in] Redirecting admin to: /admin');
           router.push("/admin");
         } else {
+          console.log('[Sign-in] Redirecting user to: /dashboard');
           router.push("/dashboard");
         }
       }
