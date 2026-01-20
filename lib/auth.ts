@@ -20,6 +20,15 @@ export const auth = betterAuth({
     process.env.NEXT_PUBLIC_BETTER_AUTH_URL,
     "https://thenextbuilder.vercel.app",
   ].filter(Boolean) as string[],
+  user: {
+    additionalFields: {
+      role: {
+        type: "string",
+        defaultValue: "USER",
+        required: false,
+      },
+    },
+  },
 });
 
 export type Session = typeof auth.$Infer.Session.session;
