@@ -31,34 +31,44 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
     });
     const isAdmin = session?.user ? (session.user as any).role === "ADMIN" : false;
 
-    // TEMPORARILY DISABLED - PageRenderer causes 500 error in production
-    // Will be fixed in next update
-    // const components = page.components.map((comp) => ({
-    //   id: comp.id,
-    //   type: comp.type,
-    //   props: comp.props,
-    // }));
+    // Render custom page with error handling
+    try {
+      const components = page.components.map((comp) => ({
+        id: comp.id,
+        type: comp.type,
+        props: comp.props,
+      }));
 
-    // return (
-    //   <>
-    //     <PageRenderer components={components} />
-    //     <PageEditButton pageId={page.id} isAdmin={isAdmin} />
-    //   </>
-    // );
-
-    // Temporary fallback - show page info
-    return (
-      <div className="min-h-screen p-8">
-        <h1 className="text-4xl font-bold mb-4">{page.title}</h1>
-        <p className="text-muted-foreground mb-4">
-          This page is being rebuilt. Custom components temporarily disabled.
-        </p>
-        <div className="p-4 bg-muted rounded">
-          <p className="text-sm">Page has {page.components.length} components</p>
-          <p className="text-sm">Status: {page.published ? 'Published' : 'Draft'}</p>
+      return (
+        <>
+          <PageRenderer components={components} />
+          <PageEditButton pageId={page.id} isAdmin={isAdmin} />
+        </>
+      );
+    } catch (renderError) {
+      console.error(`[PublicPage] PageRenderer error for page ${page.slug}:`, renderError);
+      
+      // Fallback to simple page display if PageRenderer fails
+      return (
+        <div className="min-h-screen p-8">
+          <h1 className="text-4xl font-bold mb-4">{page.title}</h1>
+          <p className="text-muted-foreground mb-4">
+            This page encountered a rendering error. Showing fallback content.
+          </p>
+          <div className="p-4 bg-yellow-100 border border-yellow-400 rounded">
+            <p className="text-sm font-medium">Technical Details:</p>
+            <p className="text-sm">Page has {page.components.length} components</p>
+            <p className="text-sm">Status: {page.published ? 'Published' : 'Draft'}</p>
+            <p className="text-sm">Error: Component rendering failed</p>
+          </div>
+          {isAdmin && (
+            <div className="mt-4">
+              <PageEditButton pageId={page.id} isAdmin={true} />
+            </div>
+          )}
         </div>
-      </div>
-    );
+      );
+    }
   } catch (error) {
     console.error('[PublicPage] Error loading page:', {
       slug,
