@@ -4,8 +4,11 @@ import type { NextRequest } from "next/server";
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Get the session token from cookies
-  const sessionToken = request.cookies.get("better-auth.session_token")?.value;
+  // Get the session token from cookies (try multiple possible names)
+  const sessionToken = request.cookies.get("better-auth.session_token")?.value ||
+    request.cookies.get("session")?.value ||
+    request.cookies.get("auth_session")?.value ||
+    request.cookies.get("better-auth.session")?.value;
 
   // Define protected routes
   const isProtectedRoute = pathname.startsWith("/dashboard") || pathname.startsWith("/admin");
