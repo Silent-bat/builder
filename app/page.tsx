@@ -1,6 +1,6 @@
-import { prisma } from "@/lib/db";
-import { PageRenderer } from "@/components/page-builder/page-renderer";
-import { PageEditButton } from "@/components/page-builder/page-edit-button";
+// import { prisma } from "@/lib/db"; // Temporarily disabled
+// import { PageRenderer } from "@/components/page-builder/page-renderer"; // Temporarily disabled
+// import { PageEditButton } from "@/components/page-builder/page-edit-button"; // Temporarily disabled
 // import { auth } from "@/lib/auth"; // Temporarily disabled to test
 // import { headers } from "next/headers"; // Temporarily disabled to test
 import Link from "next/link";
@@ -12,27 +12,27 @@ export default async function HomePage() {
   // Try to find a landing page with slug "home" or any LANDING page
   let page = null;
   let dbError = null;
-  try {
-    page = await prisma.page.findFirst({
-      where: {
-        type: "LANDING",
-        published: true,
-      },
-      include: {
-        components: {
-          orderBy: { order: "asc" },
-        },
-      },
-      orderBy: {
-        createdAt: "asc", // Get the first created landing page
-      },
-    });
-  } catch (error) {
-    // Database not available - log and continue with default page
-    console.error("[HomePage] Database error:", error);
-    dbError = error instanceof Error ? error.message : "Unknown error";
-    page = null;
-  }
+  // try {
+  //   page = await prisma.page.findFirst({
+  //     where: {
+  //       type: "LANDING",
+  //       published: true,
+  //     },
+  //     include: {
+  //       components: {
+  //         orderBy: { order: "asc" },
+  //       },
+  //     },
+  //     orderBy: {
+  //       createdAt: "asc", // Get the first created landing page
+  //     },
+  //   });
+  // } catch (error) {
+  //   // Database not available - log and continue with default page
+  //   console.error("[HomePage] Database error:", error);
+  //   dbError = error instanceof Error ? error.message : "Unknown error";
+  //   page = null;
+  // }
 
   // Check if user is admin - TEMPORARILY DISABLED
   let session = null;
