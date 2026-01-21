@@ -35,7 +35,11 @@ interface PagesManagementClientProps {
 export function PagesManagementClient({ pages: initialPages }: PagesManagementClientProps) {
   const [pages, setPages] = useState(initialPages);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterType, setFilterType] = useState<"ALL" | "LANDING" | "DASHBOARD">("ALL");
+  const [filterType, setFilterType] = useState<"ALL" | "LANDING" | "NORMAL" | "DASHBOARD">("ALL");
+  const [isLoading, setIsLoading] = useState(false);
+  const [showTypeChangeDialog, setShowTypeChangeDialog] = useState(false);
+  const [selectedPage, setSelectedPage] = useState<any>(null);
+  const [newPageType, setNewPageType] = useState<string>("");
   const [filterStatus, setFilterStatus] = useState<"ALL" | "PUBLISHED" | "DRAFT">("ALL");
   const router = useRouter();
 
@@ -51,6 +55,45 @@ export function PagesManagementClient({ pages: initialPages }: PagesManagementCl
     
     return matchesSearch && matchesType && matchesStatus;
   });
+
+  const handleChangePageType = async (pageId: string, newType: string) => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(`/api/admin/pages/${pageId}/change-type`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ newType }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to change page type");
+      }
+
+      // Refresh pages data
+      const updatedPages = pages.map(p => 
+        p.id === pageId ? { ...p, type: newType } : 
+        (newType === "LANDING" && p.type === "LANDING") ? { ...p, type: "NORMAL" } : p
+      );
+      setPages(updatedPages);
+      
+      toast.success("Success!", data.message);
+      router.refresh();
+    } catch (error) {
+      console.error("Error changing page type:", error);
+      toast.error("Error", error instanceof Error ? error.message : "Failed to change page type");
+    } finally {
+      setIsLoading(false);
+      setShowTypeChangeDialog(false);
+    }
+  };
+
+  const openTypeChangeDialog = (page: any, newType: string) => {
+    setSelectedPage(page);
+    setNewPageType(newType);
+    setShowTypeChangeDialog(true);
+  };
 
   const handleDuplicate = async (pageId: string) => {
     try {
@@ -130,6 +173,7 @@ export function PagesManagementClient({ pages: initialPages }: PagesManagementCl
           >
             <option value="ALL">All Types</option>
             <option value="LANDING">Landing</option>
+            <option value="NORMAL">Normal</option>
             <option value="DASHBOARD">Dashboard</option>
           </select>
 
@@ -179,7 +223,9 @@ export function PagesManagementClient({ pages: initialPages }: PagesManagementCl
                   </div>
                   <div className="flex items-center gap-3 text-xs text-muted-foreground">
                     <span>
-                      {p.type === "LANDING" ? "/p/" : "/dashboard/"}{p.slug}
+                      {p.type === "LANDING" ? "/" : 
+                       p.type === "NORMAL" ? `/${p.slug}` : 
+                       `/dashboard/${p.slug}`}
                     </span>
                     <span>•</span>
                     <span>{p._count.components} components</span>
@@ -269,5 +315,38 @@ export function PagesManagementClient({ pages: initialPages }: PagesManagementCl
         </div>
       </CardContent>
     </Card>
-  );
+
+    {/* Page Type Change Confirmation Dialog */}
+    {showTypeChangeDialog && selectedPage && (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-xl max-w-md">
+          <h3 className="text-lg font-semibold mb-2">
+            {newPageType === "LANDING" ? "Set as Homepage?" : `Change to ${newPageType} Page?`}
+          </h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            {newPageType === "LANDING" 
+              ? `"${selectedPage.title}" will become the new homepage. The current homepage will be converted to a normal page.`
+              : `"${selectedPage.title}" will be changed to a ${newPageType.toLowerCase()} page.`
+            }
+          </p>
+          <div className="flex gap-2 justify-end">
+            <Button
+              variant="outline"
+              onClick={() => setShowTypeChangeDialog(false)}
+              disabled={isLoading}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => handleChangePageType(selectedPage.id, newPageType)}
+              disabled={isLoading}
+              className={newPageType === "LANDING" ? "bg-blue-600 hover:bg-blue-700" : ""}
+            >
+              {isLoading ? "Updating..." : "Confirm"}
+            </Button>
+          </div>
+        </div>
+      </div>
+    )}
+  </>;
 }
