@@ -348,5 +348,6 @@ export function PagesManagementClient({ pages: initialPages }: PagesManagementCl
         </div>
       </div>
     )}
-  </>;
+  </>
+  );
 }
