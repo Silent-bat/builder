@@ -1,9 +1,6 @@
 import { notFound } from "next/navigation";
-import { headers } from "next/headers";
 import { prisma } from "@/lib/db";
 import { PageRenderer } from "@/components/page-builder/page-renderer";
-import { PageEditButton } from "@/components/page-builder/page-edit-button";
-import { auth } from "@/lib/auth";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -66,20 +63,7 @@ export default async function SlugPage({ params }: { params: Promise<{ slug: str
       notFound();
     }
 
-    // Check if user is admin
-    let session = null;
-    let isAdmin = false;
-    try {
-      session = await auth.api.getSession({
-        headers: await headers(),
-      });
-      isAdmin = session?.user ? (session.user as any).role === "ADMIN" : false;
-    } catch (error) {
-      // Session check failed - not critical for page display
-      console.error(`[Slug Page] Auth error for /${slug}:`, error);
-    }
-
-    // Render custom page with error handling
+    // Render public page (no auth check for public pages)
     try {
       const components = page.components.map((comp) => ({
         id: comp.id,
@@ -87,12 +71,7 @@ export default async function SlugPage({ params }: { params: Promise<{ slug: str
         props: comp.props,
       }));
 
-      return (
-        <>
-          <PageRenderer components={components} />
-          <PageEditButton pageId={page.id} isAdmin={isAdmin} />
-        </>
-      );
+      return <PageRenderer components={components} />;
     } catch (renderError) {
       console.error(`[Slug Page] PageRenderer error for /${slug}:`, renderError);
       
@@ -101,19 +80,11 @@ export default async function SlugPage({ params }: { params: Promise<{ slug: str
         <div className="min-h-screen p-8">
           <h1 className="text-4xl font-bold mb-4">{page.title}</h1>
           <p className="text-muted-foreground mb-4">
-            This page encountered a rendering error. Showing fallback content.
+            This page encountered a rendering error.
           </p>
           <div className="p-4 bg-yellow-100 border border-yellow-400 rounded">
-            <p className="text-sm font-medium">Technical Details:</p>
-            <p className="text-sm">Page has {page.components.length} components</p>
-            <p className="text-sm">Status: {page.published ? 'Published' : 'Draft'}</p>
-            <p className="text-sm">Error: Component rendering failed</p>
+            <p className="text-sm">Error loading page components.</p>
           </div>
-          {isAdmin && (
-            <div className="mt-4">
-              <PageEditButton pageId={page.id} isAdmin={true} />
-            </div>
-          )}
         </div>
       );
     }
