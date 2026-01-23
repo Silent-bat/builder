@@ -17,6 +17,11 @@ interface NavbarBlockProps {
   ctaText?: string;
   ctaLink?: string;
   transparent?: boolean;
+  style?: {
+    backgroundColor?: string;
+    textColor?: string;
+    height?: string;
+  };
   _editMode?: boolean;
   _onPropChange?: (key: string, value: any) => void;
 }
@@ -33,13 +38,23 @@ export function NavbarBlock({
   ctaText = "Get Started",
   ctaLink = "/auth/sign-up",
   transparent = false,
+  style,
   _editMode = false,
   _onPropChange
 }: NavbarBlockProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  const navStyle = {
+    backgroundColor: style?.backgroundColor,
+    color: style?.textColor,
+    height: style?.height,
+  };
+
   return (
-    <nav className={`sticky top-0 z-50 border-b ${transparent ? 'bg-background/80 backdrop-blur-md' : 'bg-background'}`}>
+    <nav 
+      className={`sticky top-0 z-50 border-b ${transparent ? 'bg-background/80 backdrop-blur-md' : 'bg-background'}`}
+      style={style ? navStyle : undefined}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo / Brand */}

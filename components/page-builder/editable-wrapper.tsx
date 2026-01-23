@@ -75,9 +75,12 @@ const EditableWrapperComponent = function EditableWrapper({
     }
   };
 
-  // If not in edit mode, disabled, or no onChange handler, render children only
+  // If not in edit mode, disabled, or no onChange handler, render children without wrapping
   if (!isEditMode || disabled || !onChange) {
-    return children ? <>{children}</> : <Component className={className} style={style}>{value}</Component>;
+    if (children) {
+      return <>{children}</>;
+    }
+    return <Component className={className} style={style}>{value}</Component>;
   }
 
   // If editing, show input
@@ -127,7 +130,7 @@ const EditableWrapperComponent = function EditableWrapper({
 
   if (children) {
     return (
-      <Component
+      <span
         ref={displayRef as any}
         className={editableClassName}
         onClick={handleClick}
@@ -135,10 +138,10 @@ const EditableWrapperComponent = function EditableWrapper({
         style={style}
       >
         {children}
-        <span className="absolute -top-6 left-0 bg-blue-500 text-white text-xs px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+        <span className="absolute -top-6 left-0 bg-blue-500 text-white text-xs px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
           Click to edit
         </span>
-      </Component>
+      </span>
     );
   }
 

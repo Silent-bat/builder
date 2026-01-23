@@ -27,19 +27,23 @@ export function PageRenderer({ components }: PageRendererProps) {
 
   return (
     <div className="min-h-screen">
-      {components.map((component) => {
+      {components.map((component, index) => {
         // Extract style from component.style or component.props.style
         const style = component.style || component.styles || component.props?.style || {};
         const animationClass = style.animation?.type && style.animation.type !== "none" 
           ? `animate-${style.animation.type}` 
           : "";
         
+        const isLastComponent = index === components.length - 1;
+        
         return (
           <div 
             key={component.id}
-            className={animationClass}
+            className={`${animationClass} [&>*]:!m-0 [&>*]:!p-0 [&>section]:!py-0 [&>section]:!my-0`}
             style={{
               ...applyComponentStyles(style),
+              margin: 0,
+              padding: 0,
               animationDuration: style.animation?.duration,
               animationDelay: style.animation?.delay,
               animationTimingFunction: style.animation?.easing,

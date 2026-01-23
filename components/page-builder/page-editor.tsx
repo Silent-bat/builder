@@ -295,15 +295,9 @@ export function PageEditor({ pageId, initialComponents = [], onSave }: PageEdito
                           onClick={() => addComponent(component.type)}
                           className="w-full text-left p-3 rounded-lg border bg-background hover:bg-accent transition-colors hover:shadow-sm"
                         >
-                          <div className="flex items-center gap-3">
-                            <span className="text-2xl">{component.icon}</span>
-                            <div className="flex-1">
-                              <p className="font-medium text-sm">{component.label}</p>
-                              <p className="text-xs text-muted-foreground">{component.type}</p>
-                            </div>
-                            <svg className="h-4 w-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                            </svg>
+                          <div className="flex-1">
+                            <p className="font-medium text-sm">{component.label}</p>
+                            <p className="text-xs text-muted-foreground">{component.type}</p>
                           </div>
                         </button>
                       ))}
@@ -489,24 +483,52 @@ export function PageEditor({ pageId, initialComponents = [], onSave }: PageEdito
                   items={components.map(c => c.id)}
                   strategy={verticalListSortingStrategy}
                 >
-                  <div className="p-4 space-y-3">
-                    {components.map((component) => (
-                      <SortableComponent
-                        key={component.id}
-                        id={component.id}
-                        type={component.type}
-                        props={component.props}
-                        styles={component.styles}
-                        isSelected={selectedComponent === component.id}
-                        onClick={() => setSelectedComponent(component.id)}
-                        onDelete={() => deleteComponent(component.id)}
-                        onDuplicate={() => duplicateComponent(component.id)}
-                        onPropChange={(key, value) => {
-                          updateComponent(component.id, {
-                            props: { ...component.props, [key]: value }
-                          });
-                        }}
-                      />
+                  <div className="p-4">
+                    {components.map((component, index) => (
+                      <div key={component.id}>
+                        <SortableComponent
+                          id={component.id}
+                          type={component.type}
+                          props={component.props}
+                          styles={component.styles}
+                          isSelected={selectedComponent === component.id}
+                          onClick={() => setSelectedComponent(component.id)}
+                          onDelete={() => deleteComponent(component.id)}
+                          onDuplicate={() => duplicateComponent(component.id)}
+                          onPropChange={(key, value) => {
+                            updateComponent(component.id, {
+                              props: { ...component.props, [key]: value }
+                            });
+                          }}
+                        />
+                        {/* Add Spacer Button Between Components */}
+                        {index < components.length - 1 && (
+                          <div className="flex justify-center my-2 py-2 hover:bg-primary/5 rounded-lg transition-colors group">
+                            <button
+                              onClick={() => {
+                                const newSpacer: PageComponent = {
+                                  id: `spacer-${Date.now()}`,
+                                  type: "spacer",
+                                  props: { height: 50, backgroundColor: "transparent" }
+                                };
+                                const newComponents = [...components];
+                                newComponents.splice(index + 1, 0, newSpacer);
+                                addToHistory(newComponents);
+                                setComponents(newComponents);
+                                setSelectedComponent(newSpacer.id);
+                                toast.success("Spacer added - adjust height in properties panel");
+                              }}
+                              className="px-4 py-2 rounded-full bg-primary/10 hover:bg-primary text-primary hover:text-white text-xs font-medium transition-all flex items-center gap-2 shadow-sm border border-primary/20"
+                              title="Click to add spacing between components"
+                            >
+                              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                              </svg>
+                              Add Space
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     ))}
                   </div>
                 </SortableContext>

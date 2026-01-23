@@ -34,28 +34,24 @@ export function SignInForm() {
       
       toast.success("Welcome back!", "You have successfully signed in");
       
-      // Debug logging
-      console.log('[Sign-in] Success result:', {
-        hasUser: !!result.data?.user,
-        userRole: (result.data?.user as any)?.role,
-        from: from,
-        baseURL: process.env.NEXT_PUBLIC_BETTER_AUTH_URL,
-      });
+      // Refresh the router to ensure session is loaded
+      router.refresh();
       
-      // Redirect to the page they came from, or based on user role
+      // Small delay to ensure cookies are set before navigation
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Determine redirect path based on user role
+      const userRole = (result.data?.user as any)?.role;
+      let redirectPath = "/dashboard";
+      
       if (from && !from.startsWith("/auth")) {
-        console.log('[Sign-in] Redirecting to:', from);
-        router.push(from);
-      } else {
-        const userRole = (result.data?.user as any)?.role;
-        if (userRole === "ADMIN") {
-          console.log('[Sign-in] Redirecting admin to: /admin');
-          router.push("/admin");
-        } else {
-          console.log('[Sign-in] Redirecting user to: /dashboard');
-          router.push("/dashboard");
-        }
+        redirectPath = from;
+      } else if (userRole === "ADMIN") {
+        redirectPath = "/admin";
       }
+      
+      // Use window.location for more reliable redirect after login
+      window.location.href = redirectPath;
     } catch (err: any) {
       console.error("Sign in error:", err);
       

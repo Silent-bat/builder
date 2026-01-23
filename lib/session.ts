@@ -14,9 +14,11 @@ export async function getSession() {
   }
 
   try {
+    // Use the cookie name that matches what was found
+    const cookieName = cookieStore.get("__Secure-better-auth.session_token")?.name || "better-auth.session_token";
     const session = await auth.api.getSession({
       headers: {
-        cookie: `__Secure-better-auth.session_token=${sessionToken}`,
+        cookie: `${cookieName}=${sessionToken}`,
       },
     });
 

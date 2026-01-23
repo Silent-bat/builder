@@ -4,29 +4,18 @@ import type { NextRequest } from "next/server";
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Get ALL cookies for debugging
-  const allCookies = Array.from(request.cookies.getAll());
-  
   // Get the session token from cookies (try multiple possible names)
-  const sessionToken = request.cookies.get("__Secure-better-auth.session_token")?.value ||
-    request.cookies.get("better-auth.session_token")?.value ||
+  const allCookies = request.cookies.getAll();
+  const sessionToken = request.cookies.get("better-auth.session_token")?.value ||
+    request.cookies.get("__Secure-better-auth.session_token")?.value ||
+    request.cookies.get("better_auth.session_token")?.value ||
     request.cookies.get("session")?.value ||
-    request.cookies.get("auth_session")?.value ||
-    request.cookies.get("better-auth.session")?.value;
+    request.cookies.get("auth_session")?.value;
 
-  // Debug logging for production
-  if (pathname.startsWith("/admin") || pathname.startsWith("/dashboard")) {
-    console.log("[Middleware]", {
-      pathname,
-      hasSessionToken: !!sessionToken,
-      cookieCount: allCookies.length,
-      cookieNames: allCookies.map(c => c.name),
-      sessionTokenSource: sessionToken ? 
-        (request.cookies.get("__Secure-better-auth.session_token")?.value ? "__Secure-better-auth.session_token" :
-         request.cookies.get("better-auth.session_token")?.value ? "better-auth.session_token" :
-         request.cookies.get("session")?.value ? "session" :
-         request.cookies.get("auth_session")?.value ? "auth_session" : "better-auth.session") : "none"
-    });
+  // Debug: Log cookies for protected routes
+  if ((pathname.startsWith("/dashboard") || pathname.startsWith("/admin")) && process.env.NODE_ENV === "development") {
+    console.log("[Middleware] Cookies:", allCookies.map(c => c.name));
+    console.log("[Middleware] Session token found:", !!sessionToken);
   }
 
   // Define protected routes
@@ -35,14 +24,13 @@ export async function middleware(request: NextRequest) {
 
   // If accessing protected route without session, redirect to sign-in
   if (isProtectedRoute && !sessionToken) {
-    console.log("[Middleware] Redirecting to sign-in:", pathname);
     const signInUrl = new URL("/auth/sign-in", request.url);
     signInUrl.searchParams.set("from", pathname);
     return NextResponse.redirect(signInUrl);
   }
 
-  // If accessing auth route with session, redirect to dashboard
-  if (isAuthRoute && sessionToken) {
+  // If accessing auth route with session, redirect to dashboard (but allow the initial navigation after login)
+  if (isAuthRoute && sessionToken && !pathname.includes("/api/auth")) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
@@ -60,9 +48,7 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - auth (auth pages)
-     * - test- (test pages)
      */
-    "/((?!api|_next/static|_next/image|favicon.ico|auth|test-).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico).*)",
   ],
 };

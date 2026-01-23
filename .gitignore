@@ -24,6 +24,7 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
 
 # local env files
 .env*.local
@@ -35,3 +36,18 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# database
+*.db
+*.db-journal
+/prisma/dev.db
+/prisma/dev.db-journal
+
+# backup files
+*.backup
+*.bak
+*.old
+
+# temporary files
+tmp_*
+.tmp

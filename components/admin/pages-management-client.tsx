@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "@/lib/toast";
+import { TemplateSelectionDialog } from "./template-selection-dialog";
 
 interface Page {
   id: string;
@@ -38,6 +39,7 @@ export function PagesManagementClient({ pages: initialPages }: PagesManagementCl
   const [filterType, setFilterType] = useState<"ALL" | "LANDING" | "NORMAL" | "DASHBOARD">("ALL");
   const [isLoading, setIsLoading] = useState(false);
   const [showTypeChangeDialog, setShowTypeChangeDialog] = useState(false);
+  const [showTemplateDialog, setShowTemplateDialog] = useState(false);
   const [selectedPage, setSelectedPage] = useState<any>(null);
   const [newPageType, setNewPageType] = useState<string>("");
   const [filterStatus, setFilterStatus] = useState<"ALL" | "PUBLISHED" | "DRAFT">("ALL");
@@ -148,6 +150,7 @@ export function PagesManagementClient({ pages: initialPages }: PagesManagementCl
   };
 
   return (
+    <>
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
@@ -155,6 +158,12 @@ export function PagesManagementClient({ pages: initialPages }: PagesManagementCl
             <CardTitle>All Pages ({filteredPages.length})</CardTitle>
             <CardDescription>Landing pages and dynamic dashboard pages</CardDescription>
           </div>
+          <Button onClick={() => setShowTemplateDialog(true)}>
+            <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Create Page
+          </Button>
         </div>
 
         {/* Filters */}
@@ -211,6 +220,14 @@ export function PagesManagementClient({ pages: initialPages }: PagesManagementCl
                     <span className="text-xs px-2 py-0.5 rounded bg-muted text-muted-foreground">
                       {p.type}
                     </span>
+                    {p.type === "LANDING" && (
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 flex items-center gap-1">
+                        <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                        Homepage
+                      </span>
+                    )}
                     <span
                       className={`text-xs px-2 py-0.5 rounded-full ${
                         p.published
@@ -283,6 +300,23 @@ export function PagesManagementClient({ pages: initialPages }: PagesManagementCl
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
+                      {p.published && p.type !== "LANDING" && (
+                        <>
+                          <DropdownMenuItem 
+                            onClick={() => {
+                              setSelectedPage(p);
+                              setNewPageType("LANDING");
+                              setShowTypeChangeDialog(true);
+                            }}
+                          >
+                            <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                            </svg>
+                            Set as Landing Page
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                        </>
+                      )}
                       <DropdownMenuItem onClick={() => handleDuplicate(p.id)}>
                         <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -348,6 +382,12 @@ export function PagesManagementClient({ pages: initialPages }: PagesManagementCl
         </div>
       </div>
     )}
+
+    {/* Template Selection Dialog */}
+    <TemplateSelectionDialog 
+      open={showTemplateDialog} 
+      onOpenChange={setShowTemplateDialog}
+    />
   </>
   );
 }

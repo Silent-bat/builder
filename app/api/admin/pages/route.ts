@@ -25,11 +25,35 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const input = pageUpsertSchema.parse(body);
 
-    const created = await prisma.page.create({
-      data: input,
+    // Extract components from input
+    const { components, ...pageData } = input;
+
+    // Create page with components in a transaction
+    const created = await prisma.$transaction(async (tx) => {
+      const page = await tx.page.create({
+        data: pageData,
+      });
+
+      // Create components if provided
+      if (components && components.length > 0) {
+        await tx.pageComponent.createMany({
+          data: components.map((comp) => ({
+            pageId: page.id,
+            type: comp.type,
+            order: comp.order,
+            props: comp.props as any,
+          })),
+        });
+      }
+
+      // Return page with components
+      return await tx.page.findUnique({
+        where: { id: page.id },
+        include: { components: true },
+      });
     });
 
-    return NextResponse.json(created, { status: 201 });
+    return NextResponse.json({ page: created }, { status: 201 });
   } catch (error: any) {
     if (error?.name === "ZodError") {
       return NextResponse.json(

@@ -1,6 +1,12 @@
 import { z } from "zod";
 
-export const pageTypeSchema = z.enum(["LANDING", "DASHBOARD"]);
+export const pageTypeSchema = z.enum(["LANDING", "DASHBOARD", "NORMAL"]);
+
+export const pageComponentSchema = z.object({
+  type: z.string(),
+  order: z.number(),
+  props: z.record(z.string(), z.any()),
+});
 
 export const pageUpsertSchema = z.object({
   type: pageTypeSchema,
@@ -12,6 +18,7 @@ export const pageUpsertSchema = z.object({
   title: z.string().min(1).max(120),
   contentMd: z.string().max(50_000).optional().default(""),
   published: z.boolean().optional().default(true),
+  components: z.array(pageComponentSchema).optional().default([]),
 });
 
 export const pageUpdateSchema = z.object({

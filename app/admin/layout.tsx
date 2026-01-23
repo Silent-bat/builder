@@ -1,5 +1,6 @@
 import { requireAdmin } from "@/lib/session";
 import { AdminShell } from "@/components/admin/shell";
+import { ThemeProvider } from "@/components/theme-provider";
 
 export default async function AdminLayout({
   children,
@@ -9,8 +10,15 @@ export default async function AdminLayout({
   const session = await requireAdmin();
 
   return (
-    <AdminShell user={session.user} impersonator={session.impersonator}>
-      {children}
-    </AdminShell>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+    >
+      <AdminShell user={session.user} impersonator={session.impersonator}>
+        {children}
+      </AdminShell>
+    </ThemeProvider>
   );
 }

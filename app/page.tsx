@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { PageRenderer } from "@/components/page-builder/page-renderer";
 import { PageEditButton } from "@/components/page-builder/page-edit-button";
+import { MaintenancePage } from "@/components/maintenance-page";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import Link from "next/link";
@@ -8,10 +9,8 @@ import Link from "next/link";
 export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
-  console.log("[HomePage] Starting render...");
   // Try to find a landing page with slug "home" or any LANDING page
   let page = null;
-  let dbError = null;
   try {
     page = await prisma.page.findFirst({
       where: {
@@ -28,16 +27,14 @@ export default async function HomePage() {
       },
     });
   } catch (error) {
-    // Database not available - log and continue with default page
+    // Database not available - show maintenance page
     console.error("[HomePage] Database error:", error);
-    dbError = error instanceof Error ? error.message : "Unknown error";
-    page = null;
+    return <MaintenancePage />;
   }
 
   // Check if user is admin
   let session = null;
   let isAdmin = false;
-  let authError = null;
   try {
     session = await auth.api.getSession({
       headers: await headers(),
@@ -46,11 +43,9 @@ export default async function HomePage() {
   } catch (error) {
     // Session check failed - not critical for homepage
     console.error("[HomePage] Auth error:", error);
-    authError = error instanceof Error ? error.message : "Unknown error";
   }
-  console.log("[HomePage] Page query result:", page ? "Found" : "Not found");
 
-  // Always show LANDING page if it exists, otherwise default homepage
+  // Show landing page if it exists and has components
   if (page && page.components.length > 0) {
     try {
       const components = page.components.map((comp) => ({
@@ -67,21 +62,18 @@ export default async function HomePage() {
       );
     } catch (renderError) {
       console.error("[HomePage] PageRenderer error:", renderError);
-      // Fall through to default page if PageRenderer fails
+      // Fall through to maintenance page if PageRenderer fails
     }
   }
 
-  // Default landing page if no custom page exists
+  // If no active landing page and user is not admin, show maintenance page
+  if (!page && !isAdmin) {
+    return <MaintenancePage />;
+  }
+
+  // Default landing page for admins when no custom page exists
   return (
     <div className="min-h-screen">
-      {/* Debug info - remove after fixing */}
-      {(dbError || authError) && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 m-4 rounded">
-          <p className="font-bold">Debug Information:</p>
-          {dbError && <p className="text-sm">DB Error: {dbError}</p>}
-          {authError && <p className="text-sm">Auth Error: {authError}</p>}
-        </div>
-      )}
       
       {/* Hero Section */}
       <section className="relative py-20 px-4 text-center bg-gradient-to-b from-primary/10 to-background">

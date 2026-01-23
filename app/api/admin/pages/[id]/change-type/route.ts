@@ -4,13 +4,13 @@ import { requireAdmin } from "@/lib/session";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await requireAdmin();
     
     const { newType } = await request.json();
-    const pageId = params.id;
+    const { id: pageId } = await params;
 
     if (!["LANDING", "NORMAL", "DASHBOARD"].includes(newType)) {
       return NextResponse.json(
@@ -31,7 +31,6 @@ export async function POST(
           where: { id: currentLandingPage.id },
           data: { type: "NORMAL" }
         });
-        console.log(`Converted previous LANDING page "${currentLandingPage.title}" to NORMAL`);
       }
     }
 

@@ -18,8 +18,6 @@ export async function uploadFile(file: File): Promise<string> {
   // Placeholder for file upload logic
   // In production, this would use Uploadthing, S3, or Cloudflare R2
   
-  console.log("File to upload:", file.name, file.size);
-  
   // Return a placeholder URL
   return URL.createObjectURL(file);
 }

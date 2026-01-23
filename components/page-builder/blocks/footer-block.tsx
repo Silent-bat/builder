@@ -13,8 +13,14 @@ interface FooterSection {
 interface FooterBlockProps {
   companyName?: string;
   tagline?: string;
+  description?: string;
+  links?: { label: string; href: string }[];
   sections?: FooterSection[];
   socialLinks?: { icon: string; href: string; label: string }[];
+  style?: {
+    backgroundColor?: string;
+    textColor?: string;
+  };
   _editMode?: boolean;
   _onPropChange?: (key: string, value: any) => void;
 }
@@ -22,6 +28,9 @@ interface FooterBlockProps {
 export function FooterBlock({
   companyName = "Your Company",
   tagline = "Build amazing things",
+  description,
+  links,
+  style,
   sections = [
     {
       title: "Product",
@@ -60,7 +69,13 @@ export function FooterBlock({
   _onPropChange
 }: FooterBlockProps) {
   return (
-    <footer className="border-t bg-background overflow-hidden">
+    <footer 
+      className="border-t bg-background overflow-hidden"
+      style={{
+        backgroundColor: style?.backgroundColor,
+        color: style?.textColor,
+      }}
+    >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 w-full">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 sm:gap-8 mb-6 sm:mb-8">
           {/* Brand */}

@@ -8,6 +8,12 @@ interface HeroBlockProps {
   buttonText?: string;
   buttonLink?: string;
   backgroundImage?: string;
+  style?: {
+    backgroundColor?: string;
+    textColor?: string;
+    gradient?: string;
+    minHeight?: string;
+  };
   _editMode?: boolean;
   _onPropChange?: (key: string, value: any) => void;
 }
@@ -18,17 +24,23 @@ export function HeroBlock({
   buttonText = "Get Started",
   buttonLink = "#",
   backgroundImage,
+  style,
   _editMode = false,
   _onPropChange
 }: HeroBlockProps) {
+  const sectionStyle = {
+    backgroundImage: backgroundImage ? `url(${backgroundImage})` : undefined,
+    backgroundSize: 'cover' as const,
+    backgroundPosition: 'center' as const,
+    backgroundColor: style?.backgroundColor,
+    color: style?.textColor,
+    minHeight: style?.minHeight || '100vh',
+  };
+
   return (
     <section 
-      className="relative py-20 sm:py-28 md:py-36 lg:py-44 px-4 sm:px-6 lg:px-20 min-h-screen flex items-center justify-center text-center overflow-hidden"
-      style={{
-        backgroundImage: backgroundImage ? `url(${backgroundImage})` : undefined,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }}
+      className={`relative py-20 sm:py-28 md:py-36 lg:py-44 px-4 sm:px-6 lg:px-20 flex items-center justify-center text-center overflow-hidden ${style?.gradient ? `bg-gradient-to-br ${style.gradient}` : ''}`}
+      style={sectionStyle}
     >
       {/* Animated Gradient Mesh Background */}
       <div className="absolute inset-0 gradient-mesh opacity-30 animate-gradient-shift" />

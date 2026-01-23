@@ -19,6 +19,7 @@ import { CarouselBlock } from "./blocks/carousel-block";
 import { ParallaxBlock } from "./blocks/parallax-block";
 import { GlassCardBlock } from "./blocks/glass-card-block";
 import { AnimatedBackgroundBlock } from "./blocks/animated-background-block";
+import { SpacerBlock } from "./blocks/spacer-block";
 
 export interface ComponentDefinition {
   type: string;
@@ -686,6 +687,21 @@ export const componentRegistry: ComponentDefinition[] = [
           { label: "Grid", value: "grid" },
         ]
       },
+    ],
+  },
+  {
+    type: "spacer",
+    label: "Spacer",
+    icon: "📏",
+    category: "layout",
+    component: SpacerBlock,
+    defaultProps: {
+      height: 50,
+      backgroundColor: "transparent",
+    },
+    propertySchema: [
+      { key: "height", label: "Height (px)", type: "number" },
+      { key: "backgroundColor", label: "Background Color", type: "color" },
     ],
   },
 ];

@@ -14,7 +14,6 @@ interface SendEmailOptions {
 export async function sendEmail({ to, subject, html, from }: SendEmailOptions) {
   if (!resend) {
     console.warn("Resend API key not configured. Email not sent.");
-    console.log("Email would have been sent:", { to, subject });
     return { success: false, message: "Email service not configured" };
   }
 
